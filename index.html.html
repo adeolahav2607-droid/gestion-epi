@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>Congo Contracting — Suivi EPI</title>
+<meta name="theme-color" content="#e55a00"/>
+<meta name="application-name" content="CC EPI"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="CC EPI"/>
+<meta name="description" content="Suivi des EPI - Congo Contracting"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon.png"/>
+<link rel="icon" type="image/png" href="icon.png"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --color-bg:#f5f5f0;
+  --color-surface:#ffffff;
+  --color-border:#e0ddd5;
+  --color-border-light:#ece9e1;
+  --color-text:#1a1a1a;
+  --color-text-muted:#666;
+  --color-text-hint:#999;
+  --color-brand-navy:#1a2744;
+  --color-brand-orange:#e55a00;
+  --color-valid-bg:#eaf3de; --color-valid-text:#3b6d11;
+  --color-expired-bg:#fcebeb; --color-expired-text:#a32d2d;
+  --color-soon-bg:#faeeda; --color-soon-text:#854f0b;
+  --color-neutral-bg:#f1efe8; --color-neutral-text:#5f5e5a;
+  --radius-sm:6px; --radius-md:8px; --radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --color-bg:#111;
+    --color-surface:#1e1e1e;
+    --color-border:#333;
+    --color-border-light:#2a2a2a;
+    --color-text:#f0f0f0;
+    --color-text-muted:#aaa;
+    --color-text-hint:#666;
+    --color-valid-bg:#1a3310; --color-valid-text:#7dc955;
+    --color-expired-bg:#2d0f0f; --color-expired-text:#f09595;
+    --color-soon-bg:#2d1f00; --color-soon-text:#fac775;
+    --color-neutral-bg:#222; --color-neutral-text:#aaa;
+  }
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--color-bg);color:var(--color-text);min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--color-brand-navy);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.nav{background:var(--color-brand-navy);display:flex;align-items:center;padding:0 12px;overflow-x:auto;flex-shrink:0}
+.nav-tab{color:#aab;padding:12px 14px;font-size:13px;cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s}
+.nav-tab:hover{color:#fff}
+.nav-tab.active{color:#fff;border-bottom-color:var(--color-brand-orange)}
+.screen{display:none;flex:1;padding:16px;overflow-y:auto}
+.screen.active{display:block}
+.btn{padding:8px 16px;border-radius:var(--radius-md);border:1px solid var(--color-border);background:var(--color-surface);color:var(--color-text);font-size:13px;cursor:pointer;transition:background .15s}
+.btn:hover{background:var(--color-border-light)}
+.btn-primary{background:var(--color-brand-orange);color:#fff;border-color:var(--color-brand-orange)}
+.btn-primary:hover{background:#cc4f00}
+.btn-danger{background:#c0392b;color:#fff;border-color:#c0392b}
+.btn-danger:hover{background:#a93226}
+.btn-sm{padding:5px 10px;font-size:12px}
+input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--color-border);border-radius:var(--radius-md);background:var(--color-surface);color:var(--color-text);font-size:13px;font-family:inherit}
+input:focus,select:focus{outline:none;border-color:var(--color-brand-orange)}
+label{font-size:12px;color:var(--color-text-muted);margin-bottom:4px;display:block}
+.card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:12px}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-valid{background:var(--color-valid-bg);color:var(--color-valid-text)}
+.badge-expired{background:var(--color-expired-bg);color:var(--color-expired-text)}
+.badge-undef{background:var(--color-neutral-bg);color:var(--color-neutral-text)}
+.badge-soon{background:var(--color-soon-bg);color:var(--color-soon-text)}
+.alert-banner{background:var(--color-soon-bg);border:1px solid #e55a00;border-radius:var(--radius-md);padding:10px 14px;font-size:13px;color:var(--color-soon-text);margin-bottom:10px}
+.stat-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius-md);padding:16px;text-align:center}
+.stat-num{font-size:28px;font-weight:600}
+.stat-label{font-size:12px;color:var(--color-text-muted);margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;font-size:12px;color:var(--color-text-muted);font-weight:600;border-bottom:1px solid var(--color-border)}
+td{padding:8px 10px;border-bottom:1px solid var(--color-border-light);color:var(--color-text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--color-border-light)}
+.section-title{font-size:15px;font-weight:600;color:var(--color-text);margin-bottom:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.footer{background:var(--color-brand-navy);color:#aab;text-align:center;padding:12px;font-size:13px;flex-shrink:0}
+.tag-admin{background:var(--color-brand-orange);color:#fff;font-size:10px;padding:2px 8px;border-radius:20px;margin-left:6px}
+.tag-assist{background:#334;color:#aab;font-size:10px;padding:2px 8px;border-radius:20px;margin-left:6px}
+@media(max-width:600px){
+  .grid2,.grid4{grid-template-columns:1fr}
+  .nav-tab{padding:10px 10px;font-size:12px}
+}
+
+/* Login */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--color-brand-navy)}
+.login-box{background:var(--color-surface);border-radius:var(--radius-lg);padding:40px;width:min(380px,95vw);text-align:center}
+
+/* Toast */
+.toast{position:fixed;bottom:70px;right:20px;background:var(--color-brand-navy);color:#fff;padding:10px 18px;border-radius:var(--radius-md);font-size:13px;z-index:9999;pointer-events:none;opacity:0;transition:opacity .3s}
+.toast.show{opacity:1}
+
+@media print{
+  .topbar,.nav,.footer,.btn,#alerts-container{display:none!important}
+  .screen{display:block!important;padding:0}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <svg viewBox="0 0 300 110" width="220" style="margin:0 auto 20px;display:block">
+      <g transform="translate(10,5)">
+        <path d="M60,10 A40,40 0 1,0 60,90 A25,25 0 1,1 60,40 A40,40 0 1,1 60,10Z" fill="#1a2744"/>
+        <path d="M90,20 A40,40 0 1,1 90,90 A25,25 0 1,0 90,40 A40,40 0 1,0 90,20Z" fill="#1a2744"/>
+        <circle cx="75" cy="55" r="18" fill="#e55a00"/>
+        <text x="130" y="50" font-family="Arial Black,sans-serif" font-size="22" font-weight="900" fill="#e55a00">CONGO</text>
+        <text x="130" y="78" font-family="Arial Black,sans-serif" font-size="22" font-weight="900" fill="#1a2744">CONTRACTING</text>
+      </g>
+    </svg>
+    <p style="font-size:12px;color:#888;margin-bottom:24px">Système de Suivi des EPI</p>
+    <div style="text-align:left;margin-bottom:12px"><label>Identifiant</label><input id="loginUser" placeholder="Ex: RQHSE.CC"/></div>
+    <div style="text-align:left;margin-bottom:20px"><label>Mot de passe</label><input id="loginPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:8px" onclick="doLogin()">Se connecter</button>
+    <p id="loginErr" style="color:#c0392b;font-size:12px;min-height:16px"></p>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" style="display:none;flex-direction:column;min-height:100vh">
+
+  <div class="topbar">
+    <svg viewBox="0 0 280 70" width="150">
+      <g transform="translate(5,5)">
+        <path d="M35,5 A25,25 0 1,0 35,55 A16,16 0 1,1 35,23 A25,25 0 1,1 35,5Z" fill="white"/>
+        <path d="M58,8 A25,25 0 1,1 58,58 A16,16 0 1,0 58,30 A25,25 0 1,0 58,8Z" fill="white"/>
+        <circle cx="47" cy="32" r="12" fill="#e55a00"/>
+        <text x="88" y="28" font-family="Arial Black,sans-serif" font-size="14" font-weight="900" fill="#e55a00">CONGO</text>
+        <text x="88" y="48" font-family="Arial Black,sans-serif" font-size="14" font-weight="900" fill="white">CONTRACTING</text>
+      </g>
+    </svg>
+    <div style="display:flex;align-items:center;gap:10px">
+      <span id="userLabel" style="color:#aab;font-size:12px"></span>
+      <button class="btn btn-sm" style="color:#aab;border-color:#444;background:transparent" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-tab active" onclick="showTab('dashboard',this)">Tableau de bord</div>
+    <div class="nav-tab" onclick="showTab('dotation',this)">Dotation EPI</div>
+    <div class="nav-tab" onclick="showTab('renouvellement',this)">Renouvellement</div>
+    <div class="nav-tab" onclick="showTab('personnel',this)">Personnel</div>
+    <div class="nav-tab" onclick="showTab('parametres',this)">Paramètres</div>
+  </nav>
+
+  <div id="alerts-container" style="padding:12px 16px 0"></div>
+
+  <!-- DASHBOARD -->
+  <div id="screen-dashboard" class="screen active">
+    <div class="grid4" style="margin-bottom:16px">
+      <div class="stat-card"><div class="stat-num" id="stat-total" style="color:var(--color-brand-navy)">0</div><div class="stat-label">Total dotations</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-valid" style="color:#3b6d11">0</div><div class="stat-label">EPI valides</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-expired" style="color:#a32d2d">0</div><div class="stat-label">EPI expirés</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-soon" style="color:#854f0b">0</div><div class="stat-label">Expirent bientôt</div></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Suivi des EPI par catégorie</div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>EPI</th><th>Validité</th><th>Distribués</th><th>Valides</th><th>Expirés</th><th>Statut global</th></tr></thead>
+        <tbody id="dashboard-table"></tbody></table>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+      <button class="btn btn-sm" onclick="exportExcel()">Exporter Excel</button>
+      <button class="btn btn-sm" onclick="window.print()">Imprimer</button>
+    </div>
+  </div>
+
+  <!-- DOTATION -->
+  <div id="screen-dotation" class="screen">
+    <div class="grid2" style="gap:16px;align-items:start">
+      <div>
+        <div class="card">
+          <div class="section-title">Recherche travailleur</div>
+          <div style="display:flex;gap:8px">
+            <input id="searchWorker" placeholder="Nom, prénom ou numéro..." oninput="searchWorkers()"/>
+            <button class="btn btn-sm btn-primary" onclick="searchWorkers()">Chercher</button>
+          </div>
+          <div id="searchResults" style="margin-top:10px"></div>
+        </div>
+        <div class="card" id="workerForm" style="display:none">
+          <div class="section-title" id="workerFormTitle">Dotation EPI</div>
+          <div id="selectedWorkerInfo" style="background:var(--color-border-light);border-radius:var(--radius-md);padding:10px;margin-bottom:12px;font-size:13px"></div>
+          <div class="section-title" style="font-size:13px">Dates de dotation</div>
+          <div class="grid2" style="gap:8px;margin-top:8px" id="epiDateFields"></div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="saveDotation()">Enregistrer</button>
+            <button class="btn btn-sm" onclick="closeWorkerForm()">Annuler</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Historique des dotations</div>
+        <input placeholder="Filtrer l'historique..." oninput="filterHistory(this.value)" style="margin-bottom:10px"/>
+        <div id="history-list"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="exportExcelHistory()">Exporter Excel</button>
+          <button class="btn btn-sm" onclick="window.print()">Imprimer</button>
+          <button class="btn btn-danger btn-sm" id="clearHistoryBtn" style="display:none" onclick="clearHistory()">Effacer historique</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RENOUVELLEMENT -->
+  <div id="screen-renouvellement" class="screen">
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-title">Renouvellement EPI défectueux</div>
+      <div class="grid2" style="gap:8px;margin-bottom:12px">
+        <div><label>Travailleur</label><select id="renewWorker" onchange="loadRenewEpi()"><option value="">-- Sélectionner --</option></select></div>
+        <div><label>EPI à renouveler</label><select id="renewEpi"><option value="">-- Sélectionner --</option></select></div>
+      </div>
+      <div class="grid2" style="gap:8px;margin-bottom:12px">
+        <div><label>Date de renouvellement</label><input type="date" id="renewDate"/></div>
+        <div><label>Motif</label><select id="renewReason"><option>Défectueux</option><option>Perdu</option><option>Expiré</option><option>Autre</option></select></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="saveRenewal()">Enregistrer le renouvellement</button>
+    </div>
+    <div class="card">
+      <div class="section-title">Historique des renouvellements</div>
+      <div id="renewal-history"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-sm" onclick="exportExcelRenewals()">Exporter Excel</button>
+        <button class="btn btn-sm" onclick="window.print()">Imprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PERSONNEL -->
+  <div id="screen-personnel" class="screen">
+    <div class="grid2" style="gap:16px;align-items:start">
+      <div class="card">
+        <div class="section-title" id="personnelFormTitle">Ajouter un travailleur</div>
+        <div class="grid2" style="gap:8px;margin-bottom:8px">
+          <div><label>Nom</label><input id="wNom" placeholder="Nom"/></div>
+          <div><label>Prénom</label><input id="wPrenom" placeholder="Prénom"/></div>
+        </div>
+        <div class="grid2" style="gap:8px;margin-bottom:8px">
+          <div><label>Affectation</label><input id="wAffectation" placeholder="Site / Chantier"/></div>
+          <div><label>Fonction</label><input id="wFonction" placeholder="Poste"/></div>
+        </div>
+        <div class="grid2" style="gap:8px;margin-bottom:8px">
+          <div><label>Numéro (matricule)</label><input id="wNumero" placeholder="Matricule"/></div>
+          <div><label>Adresse</label><input id="wAdresse" placeholder="Adresse"/></div>
+        </div>
+        <div class="grid2" style="gap:8px;margin-bottom:16px">
+          <div><label>Taille tenue</label><select id="wTaille"><option>XS</option><option>S</option><option selected>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option></select></div>
+          <div><label>Pointure chaussures</label><input id="wPointure" type="number" placeholder="Ex: 42" min="36" max="48"/></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="saveWorker()">Enregistrer</button>
+        <button class="btn btn-sm" id="cancelEditBtn" style="display:none;margin-left:8px" onclick="cancelEditWorker()">Annuler</button>
+      </div>
+      <div class="card">
+        <div class="section-title">Liste du personnel (<span id="personnelCount">0</span>)</div>
+        <input placeholder="Rechercher..." oninput="filterPersonnel(this.value)" style="margin-bottom:10px"/>
+        <div id="personnel-list"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn btn-sm" onclick="exportExcelPersonnel()">Exporter Excel</button>
+          <button class="btn btn-sm" onclick="window.print()">Imprimer</button>
+          <button class="btn btn-danger btn-sm" id="clearPersonnelBtn" style="display:none" onclick="clearPersonnel()">Effacer tout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARAMETRES -->
+  <div id="screen-parametres" class="screen">
+    <div class="grid2" style="gap:16px;align-items:start">
+      <div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="section-title">Validité des EPI</div>
+          <div id="validitySettings"></div>
+          <button class="btn btn-primary btn-sm" id="saveValidityBtn" style="margin-top:12px;display:none" onclick="saveValidity()">Sauvegarder les validités</button>
+        </div>
+        <div class="card">
+          <div class="section-title">Ajouter une catégorie d'EPI</div>
+          <div class="grid2" style="gap:8px;margin-bottom:8px">
+            <div><label>Nom EPI</label><input id="newEpiName" placeholder="Ex: Masque respiratoire"/></div>
+            <div><label>Validité (jours, 0 = indéfini)</label><input id="newEpiValidity" type="number" placeholder="0" min="0"/></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addEpiCategory()">Ajouter la catégorie</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">Comptes assistants</div>
+        <div id="adminOnly_accounts">
+          <div class="grid2" style="gap:8px;margin-bottom:8px">
+            <div><label>Identifiant</label><input id="newAssistUser" placeholder="Ex: ASSIST.01"/></div>
+            <div><label>Mot de passe</label><input id="newAssistPass" type="password" placeholder="••••"/></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addAssistant()">Créer compte assistant</button>
+          <div id="assistantList" style="margin-top:12px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Responsable QHSE : <strong style="color:var(--color-brand-orange)">06 700 41 57</strong> &nbsp;|&nbsp; Congo Contracting &copy; 2026</div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+const ADMIN_USER='RQHSE.CC',ADMIN_PASS='2026';
+let state={currentUser:null,isAdmin:false,workers:[],dotations:[],renewals:[],assistants:[],epiCategories:[
+  {id:'casque',name:'Casque',validity:0},
+  {id:'tenues',name:'Tenues',validity:365},
+  {id:'chaussures',name:'Chaussures de sécurité',validity:270},
+  {id:'gilet',name:'Gilet de visibilité',validity:90},
+  {id:'gants',name:'Gants',validity:0},
+  {id:'lunettes',name:'Lunettes',validity:0},
+  {id:'tablier',name:'Tablier',validity:365},
+  {id:'bouchons',name:"Bouchons d'oreille",validity:90},
+]};
+
+function loadState(){try{const s=localStorage.getItem('cc_epi_v2');if(s){const p=JSON.parse(s);['workers','dotations','renewals','assistants','epiCategories'].forEach(k=>{if(p[k])state[k]=p[k]})}}catch(e){}}
+function saveState(){try{localStorage.setItem('cc_epi_v2',JSON.stringify({workers:state.workers,dotations:state.dotations,renewals:state.renewals,assistants:state.assistants,epiCategories:state.epiCategories}))}catch(e){}}
+loadState();
+
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value.trim();
+  if(u===ADMIN_USER&&p===ADMIN_PASS){state.currentUser=u;state.isAdmin=true;startApp();}
+  else{const a=state.assistants.find(x=>x.user===u&&x.pass===p);if(a){state.currentUser=u;state.isAdmin=false;startApp();}
+  else document.getElementById('loginErr').textContent='Identifiants incorrects.';}
+}
+function startApp(){
+  document.getElementById('loginScreen').style.display='none';
+  const ma=document.getElementById('mainApp');ma.style.display='flex';ma.style.flexDirection='column';
+  const lbl=document.getElementById('userLabel');
+  lbl.innerHTML=state.isAdmin?`Admin: ${state.currentUser} <span class="tag-admin">ADMIN</span>`:`${state.currentUser} <span class="tag-assist">Assistant</span>`;
+  if(state.isAdmin){document.getElementById('clearHistoryBtn').style.display='';document.getElementById('clearPersonnelBtn').style.display='';document.getElementById('saveValidityBtn').style.display='';}
+  document.getElementById('renewDate').value=new Date().toISOString().split('T')[0];
+  renderDashboard();renderHistory();renderPersonnelList();renderRenewalHistory();renderValiditySettings();renderAssistantList();populateRenewWorker();checkAlerts();
+}
+function doLogout(){state.currentUser=null;state.isAdmin=false;document.getElementById('loginScreen').style.display='flex';document.getElementById('mainApp').style.display='none';document.getElementById('loginPass').value='';document.getElementById('loginErr').textContent='';}
+function showTab(tab,el){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('screen-'+tab).classList.add('active');
+  el.classList.add('active');
+  if(tab==='dashboard'){renderDashboard();checkAlerts();}
+  if(tab==='dotation')renderHistory();
+  if(tab==='renouvellement'){populateRenewWorker();renderRenewalHistory();}
+  if(tab==='personnel')renderPersonnelList();
+  if(tab==='parametres'){renderValiditySettings();renderAssistantList();}
+}
+function getEpiStatus(date,validity){
+  if(!date)return'non attribué';if(validity===0)return'indéfini';
+  const diff=(new Date(date).getTime()+validity*86400000-Date.now())/86400000;
+  return diff<0?'expiré':diff<30?'bientôt':'valide';
+}
+function statusBadge(s){
+  if(s==='valide')return'<span class="badge badge-valid">Valide</span>';
+  if(s==='expiré')return'<span class="badge badge-expired">Expiré</span>';
+  if(s==='indéfini')return'<span class="badge badge-undef">Indéfini</span>';
+  if(s==='bientôt')return'<span class="badge badge-soon">Expire bientôt</span>';
+  return'<span class="badge badge-undef">—</span>';
+}
+function validityLabel(d){if(d===0)return'Non défini';if(d===90)return'3 mois';if(d===270)return'9 mois';if(d===365)return'1 an';return d+' jours';}
+function renderDashboard(){
+  let total=0,valid=0,expired=0,soon=0;
+  const rows=state.epiCategories.map(cat=>{
+    const dots=state.dotations.filter(d=>d.epiId===cat.id&&d.date);
+    const v=dots.filter(d=>getEpiStatus(d.date,cat.validity)==='valide').length;
+    const e=dots.filter(d=>getEpiStatus(d.date,cat.validity)==='expiré').length;
+    const s=dots.filter(d=>getEpiStatus(d.date,cat.validity)==='bientôt').length;
+    total+=dots.length;valid+=v;expired+=e;soon+=s;
+    return`<tr><td>${cat.name}</td><td>${validityLabel(cat.validity)}</td><td>${dots.length}</td><td style="color:#3b6d11">${v}</td><td style="color:#a32d2d">${e}</td><td>${dots.length>0?statusBadge(e>0?'expiré':s>0?'bientôt':'valide'):'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('stat-total').textContent=total;document.getElementById('stat-valid').textContent=valid;document.getElementById('stat-expired').textContent=expired;document.getElementById('stat-soon').textContent=soon;
+  document.getElementById('dashboard-table').innerHTML=rows;
+}
+function checkAlerts(){
+  let html='';
+  state.epiCategories.forEach(cat=>{
+    const exp=state.dotations.filter(d=>{if(d.epiId!==cat.id||!d.date||cat.validity===0)return false;const s=getEpiStatus(d.date,cat.validity);return s==='expiré'||s==='bientôt';});
+    if(exp.length>0){
+      const names=exp.slice(0,3).map(d=>{const w=state.workers.find(x=>x.id===d.workerId);return w?w.nom+' '+w.prenom:'?';}).join(', ');
+      const more=exp.length>3?` (+${exp.length-3})`:'';
+      html+=`<div class="alert-banner">⚠ <strong>${cat.name}</strong> : ${exp.length} dotation(s) expirée(s)/bientôt → ${names}${more}</div>`;
+    }
+  });
+  document.getElementById('alerts-container').innerHTML=html;
+}
+function searchWorkers(){
+  const q=document.getElementById('searchWorker').value.toLowerCase();
+  const res=document.getElementById('searchResults');
+  if(!q){res.innerHTML='';return;}
+  const found=state.workers.filter(w=>(w.nom+w.prenom+w.numero).toLowerCase().includes(q));
+  res.innerHTML=found.length===0?'<p style="font-size:13px;color:var(--color-text-muted)">Aucun résultat</p>':
+    found.map(w=>`<div style="padding:8px;border:1px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:6px;cursor:pointer;font-size:13px" onclick="selectWorker('${w.id}')"><strong>${w.nom} ${w.prenom}</strong> — ${w.fonction} — ${w.affectation} <span style="font-size:11px;color:var(--color-text-muted)">N°${w.numero}</span></div>`).join('');
+}
+function selectWorker(id){
+  const w=state.workers.find(x=>x.id===id);if(!w)return;
+  document.getElementById('workerForm').style.display='block';
+  document.getElementById('workerFormTitle').textContent='Dotation EPI — '+w.nom+' '+w.prenom;
+  document.getElementById('selectedWorkerInfo').innerHTML=`<strong>${w.nom} ${w.prenom}</strong> | ${w.fonction} | ${w.affectation}<br>N°: ${w.numero} | Taille: ${w.taille} | Pointure: ${w.pointure}`;
+  document.getElementById('epiDateFields').innerHTML=state.epiCategories.map(cat=>{const ex=state.dotations.find(d=>d.workerId===id&&d.epiId===cat.id);return`<div><label>${cat.name} (${validityLabel(cat.validity)})</label><input type="date" id="epi_${cat.id}" value="${ex?ex.date:''}"/></div>`;}).join('');
+  document.getElementById('workerForm').dataset.workerId=id;
+}
+function closeWorkerForm(){document.getElementById('workerForm').style.display='none';}
+function saveDotation(){
+  const wId=document.getElementById('workerForm').dataset.workerId;
+  state.epiCategories.forEach(cat=>{const inp=document.getElementById('epi_'+cat.id);if(inp&&inp.value){const i=state.dotations.findIndex(d=>d.workerId===wId&&d.epiId===cat.id);const r={workerId:wId,epiId:cat.id,date:inp.value,ts:Date.now()};if(i>=0)state.dotations[i]=r;else state.dotations.push(r);}});
+  saveState();renderHistory();renderDashboard();checkAlerts();closeWorkerForm();showToast('Dotation enregistrée !');
+}
+function renderHistory(){renderHistoryFiltered('');}
+function filterHistory(q){renderHistoryFiltered(q.toLowerCase());}
+function renderHistoryFiltered(q){
+  const c=document.getElementById('history-list');
+  const grouped={};state.dotations.forEach(d=>{if(!grouped[d.workerId])grouped[d.workerId]=[];grouped[d.workerId].push(d);});
+  let html='';
+  Object.keys(grouped).forEach(wId=>{
+    const w=state.workers.find(x=>x.id===wId);if(!w)return;
+    const name=w.nom+' '+w.prenom;
+    if(q&&!name.toLowerCase().includes(q)&&!w.affectation.toLowerCase().includes(q))return;
+    html+=`<div style="margin-bottom:12px"><div style="font-size:13px;font-weight:600;margin-bottom:6px;padding:6px 8px;background:var(--color-border-light);border-radius:var(--radius-md)">${name} — ${w.fonction} — ${w.affectation}</div><table><thead><tr><th>EPI</th><th>Date dotation</th><th>Expiration</th><th>Statut</th></tr></thead><tbody>`;
+    grouped[wId].forEach(d=>{
+      const cat=state.epiCategories.find(c=>c.id===d.epiId);if(!cat)return;
+      let exp='—';if(d.date&&cat.validity>0)exp=new Date(new Date(d.date).getTime()+cat.validity*86400000).toLocaleDateString('fr-FR');
+      html+=`<tr><td>${cat.name}</td><td>${d.date?new Date(d.date).toLocaleDateString('fr-FR'):'—'}</td><td>${exp}</td><td>${statusBadge(getEpiStatus(d.date,cat.validity))}</td></tr>`;
+    });
+    html+='</tbody></table></div>';
+  });
+  c.innerHTML=html||'<p style="font-size:13px;color:var(--color-text-muted)">Aucun historique</p>';
+}
+function clearHistory(){if(!state.isAdmin)return;if(confirm('Effacer tout l\'historique des dotations ?')){state.dotations=[];saveState();renderHistory();renderDashboard();showToast('Historique effacé');}}
+let editingWorkerId=null;
+function saveWorker(){
+  const nom=document.getElementById('wNom').value.trim(),prenom=document.getElementById('wPrenom').value.trim();
+  if(!nom||!prenom){alert('Nom et prénom requis');return;}
+  const w={id:editingWorkerId||'w_'+Date.now(),nom,prenom,affectation:document.getElementById('wAffectation').value.trim(),fonction:document.getElementById('wFonction').value.trim(),numero:document.getElementById('wNumero').value.trim(),adresse:document.getElementById('wAdresse').value.trim(),taille:document.getElementById('wTaille').value,pointure:document.getElementById('wPointure').value};
+  if(editingWorkerId){const i=state.workers.findIndex(x=>x.id===editingWorkerId);if(i>=0)state.workers[i]=w;editingWorkerId=null;document.getElementById('personnelFormTitle').textContent='Ajouter un travailleur';document.getElementById('cancelEditBtn').style.display='none';}
+  else state.workers.push(w);
+  saveState();renderPersonnelList();populateRenewWorker();clearWorkerForm();showToast('Travailleur enregistré !');
+}
+function clearWorkerForm(){['wNom','wPrenom','wAffectation','wFonction','wNumero','wAdresse','wPointure'].forEach(id=>document.getElementById(id).value='');document.getElementById('wTaille').value='M';}
+function editWorker(id){const w=state.workers.find(x=>x.id===id);if(!w)return;editingWorkerId=id;document.getElementById('wNom').value=w.nom;document.getElementById('wPrenom').value=w.prenom;document.getElementById('wAffectation').value=w.affectation;document.getElementById('wFonction').value=w.fonction;document.getElementById('wNumero').value=w.numero;document.getElementById('wAdresse').value=w.adresse;document.getElementById('wTaille').value=w.taille;document.getElementById('wPointure').value=w.pointure;document.getElementById('personnelFormTitle').textContent='Modifier travailleur';document.getElementById('cancelEditBtn').style.display='';}
+function cancelEditWorker(){editingWorkerId=null;clearWorkerForm();document.getElementById('personnelFormTitle').textContent='Ajouter un travailleur';document.getElementById('cancelEditBtn').style.display='none';}
+function deleteWorker(id){if(!state.isAdmin)return;if(confirm('Supprimer ce travailleur ?')){state.workers=state.workers.filter(w=>w.id!==id);state.dotations=state.dotations.filter(d=>d.workerId!==id);saveState();renderPersonnelList();showToast('Travailleur supprimé');}}
+function filterPersonnel(q){renderPersonnelFiltered(q.toLowerCase());}
+function renderPersonnelList(){renderPersonnelFiltered('');}
+function renderPersonnelFiltered(q){
+  const c=document.getElementById('personnel-list');
+  const f=state.workers.filter(w=>!q||(w.nom+w.prenom+w.numero+w.affectation).toLowerCase().includes(q));
+  document.getElementById('personnelCount').textContent=state.workers.length;
+  c.innerHTML=f.length===0?'<p style="font-size:13px;color:var(--color-text-muted)">Aucun personnel enregistré</p>':
+    f.map(w=>`<div style="padding:8px;border:1px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:6px;font-size:13px"><div style="display:flex;justify-content:space-between;align-items:center"><strong>${w.nom} ${w.prenom}</strong><div style="display:flex;gap:4px"><button class="btn btn-sm" onclick="editWorker('${w.id}')">Modifier</button>${state.isAdmin?`<button class="btn btn-danger btn-sm" onclick="deleteWorker('${w.id}')">Suppr.</button>`:''}</div></div><div style="color:var(--color-text-muted);margin-top:4px">${w.fonction} | ${w.affectation} | N°${w.numero} | Taille:${w.taille} | Pnt:${w.pointure}</div></div>`).join('');
+}
+function clearPersonnel(){if(!state.isAdmin)return;if(confirm('Supprimer tout le personnel et les dotations ?')){state.workers=[];state.dotations=[];saveState();renderPersonnelList();renderHistory();renderDashboard();showToast('Personnel effacé');}}
+function populateRenewWorker(){const s=document.getElementById('renewWorker');s.innerHTML='<option value="">-- Sélectionner --</option>'+state.workers.map(w=>`<option value="${w.id}">${w.nom} ${w.prenom}</option>`).join('');}
+function loadRenewEpi(){const s=document.getElementById('renewEpi');s.innerHTML='<option value="">-- Sélectionner --</option>'+state.epiCategories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');}
+function saveRenewal(){
+  const wId=document.getElementById('renewWorker').value,epiId=document.getElementById('renewEpi').value,date=document.getElementById('renewDate').value,reason=document.getElementById('renewReason').value;
+  if(!wId||!epiId||!date){alert('Remplir tous les champs');return;}
+  const w=state.workers.find(x=>x.id===wId),cat=state.epiCategories.find(c=>c.id===epiId);
+  state.renewals.push({wId,wName:w.nom+' '+w.prenom,epiId,epiName:cat.name,date,reason,ts:Date.now()});
+  const i=state.dotations.findIndex(d=>d.workerId===wId&&d.epiId===epiId);
+  if(i>=0)state.dotations[i].date=date;else state.dotations.push({workerId:wId,epiId,date,ts:Date.now()});
+  saveState();renderRenewalHistory();renderDashboard();checkAlerts();showToast('Renouvellement enregistré !');
+}
+function renderRenewalHistory(){
+  const c=document.getElementById('renewal-history');
+  c.innerHTML=state.renewals.length===0?'<p style="font-size:13px;color:var(--color-text-muted)">Aucun renouvellement</p>':
+    '<table><thead><tr><th>Travailleur</th><th>EPI</th><th>Date</th><th>Motif</th></tr></thead><tbody>'+
+    state.renewals.slice().reverse().map(r=>`<tr><td>${r.wName}</td><td>${r.epiName}</td><td>${new Date(r.date).toLocaleDateString('fr-FR')}</td><td>${r.reason}</td></tr>`).join('')+'</tbody></table>';
+}
+function renderValiditySettings(){
+  const c=document.getElementById('validitySettings');
+  c.innerHTML=state.epiCategories.map(cat=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="flex:1;font-size:13px">${cat.name}</span>${state.isAdmin?`<input type="number" value="${cat.validity}" min="0" style="width:90px" id="validity_${cat.id}"/>`:`<span style="font-size:13px;color:var(--color-text-muted)">${validityLabel(cat.validity)}</span>`}</div>`).join('');
+  document.getElementById('saveValidityBtn').style.display=state.isAdmin?'':'none';
+}
+function saveValidity(){state.epiCategories.forEach(cat=>{const inp=document.getElementById('validity_'+cat.id);if(inp)cat.validity=parseInt(inp.value)||0;});saveState();renderDashboard();checkAlerts();showToast('Validités sauvegardées !');}
+function addEpiCategory(){
+  if(!state.isAdmin)return;
+  const name=document.getElementById('newEpiName').value.trim(),validity=parseInt(document.getElementById('newEpiValidity').value)||0;
+  if(!name){alert('Nom requis');return;}
+  state.epiCategories.push({id:'epi_'+Date.now(),name,validity});
+  document.getElementById('newEpiName').value='';document.getElementById('newEpiValidity').value='';
+  saveState();renderValiditySettings();renderDashboard();showToast('EPI ajouté !');
+}
+function addAssistant(){
+  if(!state.isAdmin)return;
+  const u=document.getElementById('newAssistUser').value.trim(),p=document.getElementById('newAssistPass').value.trim();
+  if(!u||!p){alert('Remplir identifiant et mot de passe');return;}
+  if(state.assistants.find(a=>a.user===u)){alert('Cet identifiant existe déjà');return;}
+  state.assistants.push({user:u,pass:p});document.getElementById('newAssistUser').value='';document.getElementById('newAssistPass').value='';
+  saveState();renderAssistantList();showToast('Assistant créé !');
+}
+function deleteAssistant(user){if(!state.isAdmin)return;state.assistants=state.assistants.filter(a=>a.user!==user);saveState();renderAssistantList();}
+function renderAssistantList(){
+  const c=document.getElementById('assistantList');if(!state.isAdmin){c.innerHTML='';return;}
+  c.innerHTML=state.assistants.length===0?'<p style="font-size:13px;color:var(--color-text-muted)">Aucun assistant</p>':
+    state.assistants.map(a=>`<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border:1px solid var(--color-border);border-radius:var(--radius-md);margin-bottom:4px;font-size:13px"><span>${a.user} <span class="tag-assist">Assistant</span></span><button class="btn btn-danger btn-sm" onclick="deleteAssistant('${a.user}')">Supprimer</button></div>`).join('');
+}
+function downloadCSV(csv,filename){const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.click();}
+function exportExcel(){let csv='EPI,Validité,Distribués,Valides,Expirés\n';state.epiCategories.forEach(cat=>{const dots=state.dotations.filter(d=>d.epiId===cat.id&&d.date);const v=dots.filter(d=>getEpiStatus(d.date,cat.validity)==='valide').length;const e=dots.filter(d=>getEpiStatus(d.date,cat.validity)==='expiré').length;csv+=`${cat.name},${validityLabel(cat.validity)},${dots.length},${v},${e}\n`;});downloadCSV(csv,'dashboard_epi.csv');}
+function exportExcelHistory(){let csv='Nom,Prénom,Fonction,Affectation,EPI,Date dotation,Date expiration,Statut\n';state.dotations.forEach(d=>{const w=state.workers.find(x=>x.id===d.workerId),cat=state.epiCategories.find(c=>c.id===d.epiId);if(!w||!cat)return;let exp='';if(d.date&&cat.validity>0)exp=new Date(new Date(d.date).getTime()+cat.validity*86400000).toLocaleDateString('fr-FR');csv+=`${w.nom},${w.prenom},${w.fonction},${w.affectation},${cat.name},${d.date?new Date(d.date).toLocaleDateString('fr-FR'):''},${exp},${getEpiStatus(d.date,cat.validity)}\n`;});downloadCSV(csv,'historique_dotations.csv');}
+function exportExcelRenewals(){let csv='Travailleur,EPI,Date,Motif\n';state.renewals.forEach(r=>{csv+=`${r.wName},${r.epiName},${new Date(r.date).toLocaleDateString('fr-FR')},${r.reason}\n`;});downloadCSV(csv,'renouvellements.csv');}
+function exportExcelPersonnel(){let csv='Nom,Prénom,Fonction,Affectation,Numéro,Adresse,Taille,Pointure\n';state.workers.forEach(w=>{csv+=`${w.nom},${w.prenom},${w.fonction},${w.affectation},${w.numero},${w.adresse},${w.taille},${w.pointure}\n`;});downloadCSV(csv,'personnel.csv');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('./sw.js').catch(()=>{});});}
+</script>
+</body>
+</html>
